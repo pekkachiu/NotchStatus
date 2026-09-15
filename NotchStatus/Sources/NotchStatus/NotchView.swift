@@ -38,15 +38,14 @@ extension SessionState {
         }
     }
 
+    /// 狀態名稱，跟隨系統語言（英文或繁體中文，見 `DisplayLanguage`）
     var title: String {
-        switch self {
-        case .working: "處理中"
-        case .waiting: "等你確認"
-        case .idle: "閒置"
-        case .done: "完成"
-        }
+        title(in: appLanguage)
     }
 }
+
+/// App 啟動時決定一次；改了系統語言要重開 App 才會生效
+private let appLanguage = DisplayLanguage.current
 
 /// expanded：平常用於 waiting 與 done（單行）；hover 時改顯示所有 session 的清單。
 /// DynamicNotch 會在上方預留瀏海高度、下方與左右各留 15pt，所以內容本身不加 padding，

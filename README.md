@@ -23,11 +23,11 @@
 | State | In the notch | When |
 |---|---|---|
 | Working | Breathing blue dot on the left of the notch, project name on the right | Claude is thinking or running tools |
-| Waiting | Notch expands to "⚠ 等你確認 · project" and stays open | Claude needs your permission or an answer |
-| Done | "✓ 完成 · project" for 3 seconds, then collapses to a gray dot | The turn has finished |
+| Waiting | Notch expands to "⚠ Needs you · project" and stays open | Claude needs your permission or an answer |
+| Done | "✓ Done · project" for 3 seconds, then collapses to a gray dot | The turn has finished |
 | Idle | Gray dot and project name | Finished and waiting for your next prompt |
 
-(The on-screen labels are in Traditional Chinese. To change them, edit `SessionState.title` in `NotchStatus/Sources/NotchStatus/NotchView.swift`.)
+Labels follow your macOS language: English, or Traditional Chinese when that's your preferred language. (The demo GIFs were recorded with the Traditional Chinese labels.)
 
 - **Multiple sessions**: with several Claude Code sessions open, the notch shows the most urgent one (waiting > working > finished). Within the same level, the most recent one wins.
 - **Hover list**: move the pointer over the notch to see every session's status.
