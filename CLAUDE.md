@@ -26,6 +26,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 🔴 **絕對不要把私人 repo 加回這個資料夾的 remote**，也不要從 `~/Desktop/NotchStatus-dev-git-backup`（舊 `.git` 備份）fetch、merge 或 cherry-pick。兩邊歷史一旦混在一起，push 時就可能把舊 commit 連同個人 email 推上公開 repo，而且推上去後無法完全清除。需要參考舊歷史時，只讀取、不要合併。
 - 🔴 **commit 作者一律用 GitHub noreply 信箱**。本 repo 已設定 `git config user.email 169379702+pekkachiu@users.noreply.github.com`（repo 層級；全域設定仍是個人 email，不要改用全域的）。push 前可用 `git log origin/main..HEAD --format='%ae'` 確認只有 noreply。
 - **commit 訊息與 PR 說明不要附 `Claude-Session` 連結**（維護者的決定，優先於預設的 attribution 規則）；`Co-Authored-By` 可以保留。
+- 🔴 **不要用 GitHub 網頁或 `gh pr merge` 合併 PR**：GitHub 產生的合併 commit 作者用的是帳號設定的 email，不是 repo 的 noreply 設定，可能把個人 email 寫進公開歷史（私人 repo 的合併 commit 就發生過）。改在本機合併：`git checkout main && git pull --ff-only && git merge --no-ff <branch> -m "Merge pull request #N from pekkachiu/<branch>"`，確認 `git log origin/main..main --format='%ae'` 只有 noreply 後再 `git push origin main`；GitHub 會自動把 PR 標成已合併。
 - 公開內容不要出現個人 email、本機路徑（`/Users/<name>/…`）、錢包以外的個人資訊。
 
 ## 架構
