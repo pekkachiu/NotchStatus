@@ -12,6 +12,10 @@
   <b>English</b> ｜ <a href="docs/README.zh-TW.md">繁體中文</a>
 </p>
 
+<p align="center">
+  <img src="docs/images/demo-notch.gif" width="512" alt="NotchStatus demo: working, waiting for permission, done, and the hover list of all sessions">
+</p>
+
 ---
 
 ## Features

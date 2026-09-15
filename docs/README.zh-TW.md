@@ -12,6 +12,10 @@
   <a href="../README.md">English</a> ｜ <b>繁體中文</b>
 </p>
 
+<p align="center">
+  <img src="images/demo-notch.gif" width="512" alt="NotchStatus 示範：處理中、等你確認、完成，以及滑鼠移上去時的所有 session 清單">
+</p>
+
 ---
 
 ## 功能

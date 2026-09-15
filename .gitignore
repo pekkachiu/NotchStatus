@@ -2,3 +2,6 @@
 .build/
 .swiftpm/
 *.app/
+
+# 錄 README demo 的原始影片（轉好的 GIF 放在 docs/images/）
+demo/
