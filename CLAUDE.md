@@ -93,6 +93,7 @@ Claude Code hooks ──寫檔──▶ ~/.claude/notch/state/<session_id>.json 
 - Hook 腳本原始碼在 repo 的 `hooks/`（`state.sh` 正式腳本、`probe.sh` Phase 0 事件探針），以 symlink 連到 `~/.claude/notch/`。settings.json 指向 `~/.claude/notch/*.sh`，所以 **repo 搬家後要重建 symlink**：
   `ln -sf "$PWD/hooks/state.sh" ~/.claude/notch/state.sh`
 - Hook 測試：`./tests/test_state.sh`（用暫存 `HOME` 隔離，不影響真正的狀態目錄）
+- README demo 錄影：`./scripts/demo.sh`（`--no-notch` 錄膠囊、`--yes` 跳過確認），用假的專案名稱依序播放各狀態；執行期間會暫停正在跑的正式版（依實際行程路徑，不假設安裝位置），結束後重開同一個。需先 `NotchStatus/build.sh`。
 - Hooks 掛在使用者全域設定 `~/.claude/settings.json`——修改時必須**合併**，不可覆蓋既有內容。自動模式的分類器會擋下 Claude 修改此檔，需請使用者自行套用（給他一行 `! ...` 指令）。
 - Swift App：`NotchStatus/`（`Package.swift`、`Sources/NotchStatusCore/`、`Sources/NotchStatus/`、`Tests/`、`Vendor/`、`Icon/`、`Info.plist`、`build.sh`、`test.sh`）。
 - App 圖示：`NotchStatus/Icon/draw-icon.swift` 用 AppKit 畫 1024 PNG（藍色漸層 + 黑色膠囊 + 藍點），`./Icon/make-icon.sh` 用 `sips` + `iconutil` 轉成 `Icon/AppIcon.icns`（有進版控，`build.sh` 直接複製、`Info.plist` 的 `CFBundleIconFile` 指向它）。改設計後要重跑 `make-icon.sh`，並同步更新 README 用的 `docs/images/icon.png`（`sips -s format png -z 256 256 Icon/AppIcon.icns --out ../docs/images/icon.png`）。
