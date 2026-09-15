@@ -86,10 +86,11 @@ Claude Code hooks ──寫檔──▶ ~/.claude/notch/state/<session_id>.json 
 - 形態由 `Presentation.mode` 決定；畫在 DynamicNotch 還是膠囊由 `Presentation.surface` 決定。
 - 瀏海的 hover 來自 DynamicNotch 的 `isHovering`；`transitionConfiguration.skipIntermediateHides = true` 讓 compact ↔ expanded 直接變形，避免先收起再展開造成閃爍。
 - 從清單收起時，清單要留到收起動畫結束才換回單行內容，否則會閃出聚合狀態（例如「✓ 完成」）。
+- 狀態名稱跟隨 macOS 偏好語言（`DisplayLanguage`，App 啟動時決定一次）：繁體中文（`zh-Hant`、`zh-TW/HK/MO`）顯示「處理中 / 等你確認 / 閒置 / 完成」，其他語言一律英文「Working / Needs you / Idle / Done」；簡體中文不支援、退回英文。翻譯直接寫在 `SessionState.title(in:)`，不用 `.lproj`（CLT 手動組 .app 打包資源很麻煩）。新增文字時兩種語言都要補、並補測試。測英文畫面不用改系統語言：啟動時加 `-AppleLanguages '(en)'`。
 
 ### App 程式結構（`NotchStatus/`）
 
-- `NotchStatusCore`（library，不依賴 UI）：`SessionStatus` 解析、`Aggregator` 聚合與清單排序、`StateStore` 讀目錄並刪除已結束 session 的檔案、`ProcessLiveness`、`Presentation`（`NotchMode`、`NotchSurface`）。**所有規則邏輯放這裡並先寫測試**。
+- `NotchStatusCore`（library，不依賴 UI）：`SessionStatus` 解析、`Aggregator` 聚合與清單排序、`StateStore` 讀目錄並刪除已結束 session 的檔案、`ProcessLiveness`、`Presentation`（`NotchMode`、`NotchSurface`）、`DisplayLanguage`（畫面語言與狀態名稱）。**所有規則邏輯放這裡並先寫測試**。
 - `NotchStatus`（executable）：
   - `main.swift`：`StateWatcher`（FSEvents）與每 10 秒的計時器 → `StateStore.load` → `NotchController.update`
   - `NotchController`：依序呼叫 DynamicNotch 的 `hide/compact/expand` 或 `PillWindow`，一次只套一個，套完再追最新狀態；處理 hover、done 3 秒收起、螢幕變化
