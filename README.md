@@ -112,14 +112,14 @@ cd NotchStatus
 ./build.sh --install
 ```
 
-This installs `~/Applications/NotchStatus.app` and launches it. On first launch it registers itself as a login item, so it starts automatically after every login. macOS shows a one-time notification about the new login item.
+This installs `~/Applications/NotchStatus.app` and launches it. If you've moved the app to `/Applications`, later runs update that copy instead. On first launch it registers itself as a login item, so it starts automatically after every login. macOS shows a one-time notification about the new login item.
 
 ## Usage
 
 Once installed, there's nothing more to do. Use Claude Code as usual and the notch keeps up with it.
 
 - **See all sessions**: hover over the notch (or the floating pill).
-- **Quit for now**: `pkill -x NotchStatus`. To start it again, open NotchStatus from `~/Applications`.
+- **Quit for now**: `pkill -x NotchStatus`. To start it again, open NotchStatus from your Applications folder.
 - **Stop launching at login**: turn NotchStatus off in System Settings → General → Login Items.
 
 The app has no Dock icon, no menu, and no settings window. Clicking its icon while it's already running does nothing, and that's expected.
@@ -128,7 +128,7 @@ The app has no Dock icon, no menu, and no settings window. Clicking its icon whi
 
 ```bash
 pkill -x NotchStatus
-rm -rf ~/Applications/NotchStatus.app ~/.claude/notch
+rm -rf ~/Applications/NotchStatus.app /Applications/NotchStatus.app ~/.claude/notch
 ```
 
 Then:
@@ -142,7 +142,7 @@ Run these from `NotchStatus/`:
 | Command | Purpose |
 |---|---|
 | `./build.sh` | Build `NotchStatus.app` without installing it |
-| `./build.sh --install` | Build, install to `~/Applications`, and relaunch |
+| `./build.sh --install` | Build, install (updating the copy in `/Applications` if there is one, otherwise `~/Applications`), and relaunch |
 | `./test.sh` | Run the Swift tests (`./test.sh --filter AggregatorTests` runs one suite) |
 | `../tests/test_state.sh` | Run the hook script tests |
 | `./Icon/make-icon.sh` | Regenerate the icon after editing `Icon/draw-icon.swift` |
