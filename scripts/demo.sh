@@ -46,7 +46,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
-NOTCH_STATE_DIR="$DIR" NOTCH_FORCE_NO_NOTCH="$FORCE_NO_NOTCH" "$APP" > /dev/null 2>&1 &
+# 只有 --no-notch 時才設定 NOTCH_FORCE_NO_NOTCH（有設定就會被當成沒有瀏海）
+if [ -n "$FORCE_NO_NOTCH" ]; then
+  NOTCH_STATE_DIR="$DIR" NOTCH_FORCE_NO_NOTCH=1 "$APP" > /dev/null 2>&1 &
+else
+  NOTCH_STATE_DIR="$DIR" "$APP" > /dev/null 2>&1 &
+fi
 disown # 結束時由 cleanup 關掉，不要讓 shell 印出 "Terminated"
 sleep 1.5
 
