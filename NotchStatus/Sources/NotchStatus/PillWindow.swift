@@ -83,14 +83,17 @@ private struct PillView: View {
 
     private var showingList: Bool { hovering && !model.sessions.isEmpty }
 
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: showingList ? 16 : 14, style: .continuous)
+    }
+
     var body: some View {
         content
             .padding(.horizontal, 14)
             .padding(.vertical, showingList ? 12 : 7)
-            .background(
-                RoundedRectangle(cornerRadius: showingList ? 16 : 14, style: .continuous)
-                    .fill(.black)
-            )
+            .background(shape.fill(.black))
+            // 內容切換的動畫中，新內容會比黑底先長大；裁在同一個形狀內，文字才不會露到膠囊外面
+            .clipShape(shape)
             .onHover { hovering = $0 }
             .animation(.snappy(duration: 0.25), value: showingList)
             .animation(.snappy(duration: 0.25), value: model.pillExpanded)
