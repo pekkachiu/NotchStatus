@@ -12,6 +12,10 @@
   <b>English</b> ｜ <a href="docs/README.zh-TW.md">繁體中文</a>
 </p>
 
+<p align="center">
+  <img src="docs/images/demo-notch.gif" width="512" alt="NotchStatus demo: working, waiting for permission, done, and the hover list of all sessions">
+</p>
+
 ---
 
 ## Features
@@ -31,6 +35,11 @@
 - **External monitor as the main display**: the status always stays on the built-in notched display, and it moves back there automatically after you plug or unplug displays.
 - **Automatic cleanup**: if you close a terminal without ending the session, NotchStatus notices the Claude process is gone and removes that session.
 - **Launches at login**, has no Dock icon, never steals focus, and shows over full-screen apps.
+
+<p align="center">
+  <img src="docs/images/demo-pill.gif" width="440" alt="The floating pill used on displays without a notch"><br>
+  <sub>Without a notch (lid closed, external display only), the same states appear in a floating pill.</sub>
+</p>
 
 ## How it works
 
@@ -108,14 +117,14 @@ cd NotchStatus
 ./build.sh --install
 ```
 
-This installs `~/Applications/NotchStatus.app` and launches it. On first launch it registers itself as a login item, so it starts automatically after every login. macOS shows a one-time notification about the new login item.
+This installs `~/Applications/NotchStatus.app` and launches it. If you've moved the app to `/Applications`, later runs update that copy instead. On first launch it registers itself as a login item, so it starts automatically after every login. macOS shows a one-time notification about the new login item.
 
 ## Usage
 
 Once installed, there's nothing more to do. Use Claude Code as usual and the notch keeps up with it.
 
 - **See all sessions**: hover over the notch (or the floating pill).
-- **Quit for now**: `pkill -x NotchStatus`. To start it again, open NotchStatus from `~/Applications`.
+- **Quit for now**: `pkill -x NotchStatus`. To start it again, open NotchStatus from your Applications folder.
 - **Stop launching at login**: turn NotchStatus off in System Settings → General → Login Items.
 
 The app has no Dock icon, no menu, and no settings window. Clicking its icon while it's already running does nothing, and that's expected.
@@ -124,7 +133,7 @@ The app has no Dock icon, no menu, and no settings window. Clicking its icon whi
 
 ```bash
 pkill -x NotchStatus
-rm -rf ~/Applications/NotchStatus.app ~/.claude/notch
+rm -rf ~/Applications/NotchStatus.app /Applications/NotchStatus.app ~/.claude/notch
 ```
 
 Then:
@@ -138,7 +147,7 @@ Run these from `NotchStatus/`:
 | Command | Purpose |
 |---|---|
 | `./build.sh` | Build `NotchStatus.app` without installing it |
-| `./build.sh --install` | Build, install to `~/Applications`, and relaunch |
+| `./build.sh --install` | Build, install (updating the copy in `/Applications` if there is one, otherwise `~/Applications`), and relaunch |
 | `./test.sh` | Run the Swift tests (`./test.sh --filter AggregatorTests` runs one suite) |
 | `../tests/test_state.sh` | Run the hook script tests |
 | `./Icon/make-icon.sh` | Regenerate the icon after editing `Icon/draw-icon.swift` |

@@ -159,7 +159,8 @@ final class NotchController {
     /// 判斷條件與 DynamicNotchKit 內部的 `hasNotch` 相同（該屬性不是 public）。
     /// `NOTCH_FORCE_NO_NOTCH`：測試用，假裝所有螢幕都沒有瀏海（不用合上 MacBook 就能測膠囊）。
     private static func hasNotch(_ screen: NSScreen) -> Bool {
-        guard ProcessInfo.processInfo.environment["NOTCH_FORCE_NO_NOTCH"] == nil else { return false }
+        // 空字串視同沒設定，避免腳本傳 NOTCH_FORCE_NO_NOTCH="" 時意外變成沒有瀏海
+        if let force = ProcessInfo.processInfo.environment["NOTCH_FORCE_NO_NOTCH"], !force.isEmpty { return false }
         return screen.auxiliaryTopLeftArea != nil && screen.auxiliaryTopRightArea != nil
     }
 

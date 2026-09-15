@@ -83,14 +83,17 @@ private struct PillView: View {
 
     private var showingList: Bool { hovering && !model.sessions.isEmpty }
 
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: showingList ? 16 : 14, style: .continuous)
+    }
+
     var body: some View {
         content
             .padding(.horizontal, 14)
             .padding(.vertical, showingList ? 12 : 7)
-            .background(
-                RoundedRectangle(cornerRadius: showingList ? 16 : 14, style: .continuous)
-                    .fill(.black)
-            )
+            .background(shape.fill(.black))
+            // 內容切換的動畫中，新內容會比黑底先長大；裁在同一個形狀內，文字才不會露到膠囊外面
+            .clipShape(shape)
             .onHover { hovering = $0 }
             .animation(.snappy(duration: 0.25), value: showingList)
             .animation(.snappy(duration: 0.25), value: model.pillExpanded)
@@ -102,7 +105,9 @@ private struct PillView: View {
     @ViewBuilder
     private var content: some View {
         if showingList {
+            // fixedSize：清單裡有 Spacer，不固定的話會被撐到整個視窗寬（DynamicNotch 內部也是這樣處理）
             SessionListView(sessions: model.sessions)
+                .fixedSize()
         } else if let status = model.status, model.pillExpanded {
             StatusLine(status: status)
         } else if let status = model.status {
@@ -113,8 +118,11 @@ private struct PillView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(.white.opacity(0.9))
                     .lineLimit(1)
+                    .truncationMode(.tail)
                     .frame(maxWidth: 160)
             }
+            // 視窗比膠囊寬，不固定的話 maxWidth 會把短名稱也撐到 160pt，膠囊中間出現大片空白
+            .fixedSize(horizontal: true, vertical: false)
         }
     }
 }

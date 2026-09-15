@@ -12,6 +12,10 @@
   <a href="../README.md">English</a> ｜ <b>繁體中文</b>
 </p>
 
+<p align="center">
+  <img src="images/demo-notch.gif" width="512" alt="NotchStatus 示範：處理中、等你確認、完成，以及滑鼠移上去時的所有 session 清單">
+</p>
+
 ---
 
 ## 功能
@@ -29,6 +33,11 @@
 - **外接螢幕設為主螢幕**也沒問題：瀏海永遠顯示在 MacBook 內建螢幕上，插拔螢幕後會自動移回來。
 - **自動清理**：直接關掉終端機（沒有正常結束 session）時，會依行程是否還在自動移除該 session。
 - **開機自動啟動**，沒有 Dock 圖示、不搶焦點、可顯示在全螢幕 App 上。
+
+<p align="center">
+  <img src="images/demo-pill.gif" width="440" alt="沒有瀏海的螢幕上使用的浮動膠囊"><br>
+  <sub>沒有瀏海時（合上 MacBook、只用外接螢幕），同樣的狀態改用浮動膠囊顯示。</sub>
+</p>
 
 ## 運作方式
 
@@ -106,14 +115,14 @@ cd NotchStatus
 ./build.sh --install
 ```
 
-App 會安裝到 `~/Applications/NotchStatus.app` 並立刻啟動。第一次啟動時會註冊成登入項目，之後每次開機都會自動執行（macOS 會跳出一次通知，告知有新的登入項目）。
+App 會安裝到 `~/Applications/NotchStatus.app` 並立刻啟動；如果你之後把它移到 `/Applications`，下次會改為更新那一份。第一次啟動時會註冊成登入項目，之後每次開機都會自動執行（macOS 會跳出一次通知，告知有新的登入項目）。
 
 ## 使用
 
 安裝完就不用管它了，開 Claude Code 照常工作，瀏海會自動反映狀態。
 
 - **看所有 session**：滑鼠移到瀏海（或浮動膠囊）上。
-- **暫時關閉**：`pkill -x NotchStatus`；要再開啟就在 `~/Applications` 點 NotchStatus。
+- **暫時關閉**：`pkill -x NotchStatus`；要再開啟就在「應用程式」資料夾點 NotchStatus。
 - **取消開機啟動**：「系統設定 → 一般 → 登入項目」中關閉 NotchStatus。
 
 App 沒有 Dock 圖示、沒有選單，也沒有設定畫面；在執行中再點一次圖示不會有任何反應，這是正常的。
@@ -122,7 +131,7 @@ App 沒有 Dock 圖示、沒有選單，也沒有設定畫面；在執行中再�
 
 ```bash
 pkill -x NotchStatus
-rm -rf ~/Applications/NotchStatus.app ~/.claude/notch
+rm -rf ~/Applications/NotchStatus.app /Applications/NotchStatus.app ~/.claude/notch
 ```
 
 接著：
@@ -136,7 +145,7 @@ rm -rf ~/Applications/NotchStatus.app ~/.claude/notch
 | 指令 | 用途 |
 |---|---|
 | `./build.sh` | 建置 `NotchStatus.app`（不安裝） |
-| `./build.sh --install` | 建置並安裝到 `~/Applications`，重新啟動 |
+| `./build.sh --install` | 建置並安裝（`/Applications` 已有就更新那份，否則裝到 `~/Applications`），重新啟動 |
 | `./test.sh` | 執行 Swift 測試（`./test.sh --filter AggregatorTests` 只跑一組） |
 | `../tests/test_state.sh` | 執行 hook 腳本的測試 |
 | `./Icon/make-icon.sh` | 修改 `Icon/draw-icon.swift` 後重新產生圖示 |

@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 實際情況與規格衝突時以實際為準，但要告知使用者差異。
 - **不擴充範圍**：有改進想法先提出詢問，不要直接實作。
 - `main` 只透過 PR 合併；新工作開新分支（`feat/…`、`fix/…`、`docs/…`）照常 commit，但**不要主動 push 或開 PR，完成時也不用詢問**——維護者要推 GitHub 時會主動說。Repo：https://github.com/pekkachiu/NotchStatus（公開，MIT）。
-- 改完程式後，使用者日常用的是 `~/Applications` 裡的正式版：確認沒問題後用 `./build.sh --install` 更新它。
+- 改完程式後，使用者日常用的是安裝好的正式版（目前在 `/Applications`）：確認沒問題後用 `./build.sh --install` 更新它。
 
 ## 公開 repo 與隱私（必讀）
 
@@ -103,6 +103,7 @@ Claude Code hooks ──寫檔──▶ ~/.claude/notch/state/<session_id>.json 
 - Hook 腳本原始碼在 repo 的 `hooks/`（`state.sh` 正式腳本、`probe.sh` Phase 0 事件探針），以 symlink 連到 `~/.claude/notch/`。settings.json 指向 `~/.claude/notch/*.sh`，所以 **repo 搬家後要重建 symlink**：
   `ln -sf "$PWD/hooks/state.sh" ~/.claude/notch/state.sh`
 - Hook 測試：`./tests/test_state.sh`（用暫存 `HOME` 隔離，不影響真正的狀態目錄）
+- README demo 錄影：`./scripts/demo.sh`（`--no-notch` 錄膠囊、`--yes` 跳過確認），用假的專案名稱依序播放各狀態；執行期間會暫停正在跑的正式版（依實際行程路徑，不假設安裝位置），結束後重開同一個。需先 `NotchStatus/build.sh`。
 - Hooks 掛在使用者全域設定 `~/.claude/settings.json`——修改時必須**合併**，不可覆蓋既有內容。自動模式的分類器會擋下 Claude 修改此檔，需請使用者自行套用（給他一行 `! ...` 指令）。
 - Swift App：`NotchStatus/`（`Package.swift`、`Sources/NotchStatusCore/`、`Sources/NotchStatus/`、`Tests/`、`Vendor/`、`Icon/`、`Info.plist`、`build.sh`、`test.sh`）。
 - App 圖示：`NotchStatus/Icon/draw-icon.swift` 用 AppKit 畫 1024 PNG（藍色漸層 + 黑色膠囊 + 藍點），`./Icon/make-icon.sh` 用 `sips` + `iconutil` 轉成 `Icon/AppIcon.icns`（有進版控，`build.sh` 直接複製、`Info.plist` 的 `CFBundleIconFile` 指向它）。改設計後要重跑 `make-icon.sh`，並同步更新 README 用的 `docs/images/icon.png`（`sips -s format png -z 256 256 Icon/AppIcon.icns --out ../docs/images/icon.png`）。
@@ -114,12 +115,12 @@ Claude Code hooks ──寫檔──▶ ~/.claude/notch/state/<session_id>.json 
 - DynamicNotchKit 因此 vendor 在 `NotchStatus/Vendor/DynamicNotchKit/`（上游 1.1.0），所有修改標有 `NotchStatus patch`，差異與升級步驟見該目錄的 `VENDOR.md`。不要改回用 URL 依賴。
 - 在 `NotchStatus/` 下執行：
   - 建置並打包：`./build.sh`（`swift build -c release` → 組 `NotchStatus.app` → `codesign -s -` ad-hoc 簽章）
-  - 安裝（日常使用的版本）：`./build.sh --install` → 複製到 `~/Applications/NotchStatus.app` 並啟動。App 只有從 Applications 資料夾執行時才會用 `SMAppService.mainApp` 註冊開機啟動（開發版與測試不會）；關閉請到「系統設定 → 一般 → 登入項目」。
+  - 安裝（日常使用的版本）：`./build.sh --install` → 已裝在 `/Applications` 就更新那份，否則裝到 `~/Applications`，並啟動（兩處都有時會提醒刪掉 `~/Applications` 那份）。App 只有從 Applications 資料夾執行時才會用 `SMAppService.mainApp` 註冊開機啟動（開發版與測試不會）；關閉請到「系統設定 → 一般 → 登入項目」。
   - 只編譯：`swift build`
   - 測試：`./test.sh`（單一測試：`./test.sh --filter AggregatorTests`）。CLT 內建 Swift Testing，但 `swift test` 找不到它，`test.sh` 會補上 framework 路徑與 rpath；**XCTest 在 CLT 下不可用**，一律用 Swift Testing。
   - 隔離測試 UI：`NOTCH_STATE_DIR=/tmp/notch-test "$PWD/NotchStatus.app/Contents/MacOS/NotchStatus"`，改看別的目錄，不受正在跑的 Claude session 干擾；每次切換形態會 `NSLog` 一行 `NotchStatus: <state> <project> -> <mode>`（啟動時把 stdout/stderr 導到檔案即可讀取）。
   - 模擬沒有瀏海（測膠囊）：再加 `NOTCH_FORCE_NO_NOTCH=1`。沒有瀏海時全部由膠囊顯示、不經過 DynamicNotch，所以在 MacBook 上模擬的結果就等於真實情況。
-  - ⚠️ `pkill -x NotchStatus` 會連使用者日常在跑的 `~/Applications/NotchStatus.app` 一起關掉。測試時用**絕對路徑**啟動開發版，再用 `pkill -f "$PWD/NotchStatus.app"` 只關它——用相對路徑 `./NotchStatus.app/...` 啟動的行程比對不到，會殘留在背景。若不小心關了正式版，測完要 `open ~/Applications/NotchStatus.app` 重新啟動。
+  - ⚠️ `pkill -x NotchStatus` 會連使用者日常在跑的正式版一起關掉。測試時用**絕對路徑**啟動開發版，再用 `pkill -f "$PWD/NotchStatus.app"` 只關它——用相對路徑 `./NotchStatus.app/...` 啟動的行程比對不到，會殘留在背景。若不小心關了正式版，測完要重新 `open` 它（目前在 `/Applications/NotchStatus.app`；使用者可能自行移動，先確認位置）。
   - 不要用 `sfltool dumpbtm` 檢查登入項目，它會跳出管理員密碼視窗。
 - `Info.plist` 設 `LSUIElement = 1`，`main.swift` 也呼叫 `NSApp.setActivationPolicy(.accessory)`，確保不出現在 Dock。App 沒有選單，只能用 `pkill` 結束。
 - DynamicNotchKit 的 panel 是半個螢幕大的透明視窗（`.screenSaver` 層級、`canJoinAllSpaces`、`fullScreenAuxiliary`），瀏海形狀畫在裡面；`PillWindow` 同樣是比膠囊大的透明視窗（360×240）。
