@@ -34,6 +34,11 @@
 - **自動清理**：直接關掉終端機（沒有正常結束 session）時，會依行程是否還在自動移除該 session。
 - **開機自動啟動**，沒有 Dock 圖示、不搶焦點、可顯示在全螢幕 App 上。
 
+<p align="center">
+  <img src="images/demo-pill.gif" width="440" alt="沒有瀏海的螢幕上使用的浮動膠囊"><br>
+  <sub>沒有瀏海時（合上 MacBook、只用外接螢幕），同樣的狀態改用浮動膠囊顯示。</sub>
+</p>
+
 ## 運作方式
 
 ```

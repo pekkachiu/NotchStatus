@@ -36,6 +36,11 @@
 - **Automatic cleanup**: if you close a terminal without ending the session, NotchStatus notices the Claude process is gone and removes that session.
 - **Launches at login**, has no Dock icon, never steals focus, and shows over full-screen apps.
 
+<p align="center">
+  <img src="docs/images/demo-pill.gif" width="440" alt="The floating pill used on displays without a notch"><br>
+  <sub>Without a notch (lid closed, external display only), the same states appear in a floating pill.</sub>
+</p>
+
 ## How it works
 
 ```
