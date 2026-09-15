@@ -102,7 +102,9 @@ private struct PillView: View {
     @ViewBuilder
     private var content: some View {
         if showingList {
+            // fixedSize：清單裡有 Spacer，不固定的話會被撐到整個視窗寬（DynamicNotch 內部也是這樣處理）
             SessionListView(sessions: model.sessions)
+                .fixedSize()
         } else if let status = model.status, model.pillExpanded {
             StatusLine(status: status)
         } else if let status = model.status {
