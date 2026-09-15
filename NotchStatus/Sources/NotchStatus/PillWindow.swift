@@ -115,8 +115,11 @@ private struct PillView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(.white.opacity(0.9))
                     .lineLimit(1)
+                    .truncationMode(.tail)
                     .frame(maxWidth: 160)
             }
+            // 視窗比膠囊寬，不固定的話 maxWidth 會把短名稱也撐到 160pt，膠囊中間出現大片空白
+            .fixedSize(horizontal: true, vertical: false)
         }
     }
 }
