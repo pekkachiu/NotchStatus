@@ -19,6 +19,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `main` 只透過 PR 合併；新工作開新分支（`feat/…`、`fix/…`、`docs/…`）照常 commit，但**不要主動 push 或開 PR，完成時也不用詢問**——維護者要推 GitHub 時會主動說。Repo：https://github.com/pekkachiu/NotchStatus（公開，MIT）。
 - 改完程式後，使用者日常用的是 `~/Applications` 裡的正式版：確認沒問題後用 `./build.sh --install` 更新它。
 
+## 公開 repo 與隱私（必讀）
+
+這個 repo 是公開的。原本的開發歷史在另一個私人 repo（`pekkachiu/NotchStatus-dev`），裡面的 commit 帶有維護者的個人 email 與 Claude session 連結，所以公開版是從內容快照重新建立、沒有那段歷史。
+
+- 🔴 **絕對不要把私人 repo 加回這個資料夾的 remote**，也不要從 `~/Desktop/NotchStatus-dev-git-backup`（舊 `.git` 備份）fetch、merge 或 cherry-pick。兩邊歷史一旦混在一起，push 時就可能把舊 commit 連同個人 email 推上公開 repo，而且推上去後無法完全清除。需要參考舊歷史時，只讀取、不要合併。
+- 🔴 **commit 作者一律用 GitHub noreply 信箱**。本 repo 已設定 `git config user.email 169379702+pekkachiu@users.noreply.github.com`（repo 層級；全域設定仍是個人 email，不要改用全域的）。push 前可用 `git log origin/main..HEAD --format='%ae'` 確認只有 noreply。
+- **commit 訊息與 PR 說明不要附 `Claude-Session` 連結**（維護者的決定，優先於預設的 attribution 規則）；`Co-Authored-By` 可以保留。
+- 公開內容不要出現個人 email、本機路徑（`/Users/<name>/…`）、錢包以外的個人資訊。
+
 ## 架構
 
 三個部分只透過狀態檔目錄耦合，可各自獨立測試：
