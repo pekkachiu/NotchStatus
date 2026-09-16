@@ -62,7 +62,7 @@ Claude Code hooks ──寫檔──▶ ~/.claude/notch/state/<session_id>.json 
 
 ## 系統需求
 
-- macOS 13 以上
+- macOS 14 以上
 - 有瀏海的 MacBook（沒有瀏海也能用，會改用浮動膠囊）
 - [Claude Code](https://claude.com/claude-code)
 - Xcode Command Line Tools（`xcode-select --install`）——**不需要完整的 Xcode**

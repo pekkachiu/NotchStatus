@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "NotchStatus",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v14)],
     dependencies: [
         // vendor 版，修改內容見 Vendor/DynamicNotchKit/VENDOR.md
         .package(path: "Vendor/DynamicNotchKit")

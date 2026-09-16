@@ -15,29 +15,6 @@ final class NotchModel: ObservableObject {
 }
 
 extension SessionState {
-    var color: Color {
-        switch self {
-        case .working: .blue
-        case .waiting: .orange
-        case .idle: .gray
-        case .done: .green
-        }
-    }
-
-    /// compact 色點：done 收起後跟 idle 一樣是「跑完了」，用灰色
-    var compactColor: Color {
-        self == .done ? .gray : color
-    }
-
-    var symbol: String {
-        switch self {
-        case .working: "circle.dotted"
-        case .waiting: "exclamationmark.triangle.fill"
-        case .idle: "moon.fill"
-        case .done: "checkmark.circle.fill"
-        }
-    }
-
     /// 狀態名稱，跟隨系統語言（英文或繁體中文，見 `DisplayLanguage`）
     var title: String {
         title(in: appLanguage)
@@ -58,6 +35,7 @@ struct ExpandedView: View {
             SessionListView(sessions: model.sessions)
         } else if let status = model.status {
             StatusLine(status: status)
+                .animation(.smooth(duration: 0.25), value: status)
         }
     }
 }
@@ -65,21 +43,28 @@ struct ExpandedView: View {
 /// 單行狀態「⚠ 等你確認 · 專案名」，瀏海展開與膠囊共用
 struct StatusLine: View {
     let status: SessionStatus
+    /// done 的勾勾出現時彈一下；waiting 的警告圖示持續脈動，常駐時才不會被忽略
+    @State private var appeared = false
 
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: status.state.symbol)
                 .foregroundStyle(status.state.color)
+                .symbolEffect(.pulse, options: .repeating, isActive: status.state == .waiting)
+                .symbolEffect(.bounce, options: .nonRepeating, value: appeared)
             Text(status.state.title)
-                .fontWeight(.semibold)
+                .font(Theme.lineEmphasis)
                 .foregroundStyle(.white)
+                .contentTransition(.opacity)
             Text("·")
-                .foregroundStyle(.white.opacity(0.4))
+                .foregroundStyle(.white.opacity(0.35))
             Text(status.project)
                 .foregroundStyle(.white.opacity(0.7))
                 .lineLimit(1)
+                .contentTransition(.opacity)
         }
-        .font(.system(size: 13))
+        .font(Theme.line)
+        .onAppear { appeared = true }
     }
 }
 
@@ -90,21 +75,39 @@ struct SessionListView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             // 同一個資料夾可能開多個 session，project 與 ts 都可能相同，用位置當 id
-            ForEach(Array(sessions.enumerated()), id: \.offset) { _, session in
-                HStack(spacing: 8) {
-                    StateIndicator(state: session.state)
-                        .frame(width: 14)
-                    Text(session.project)
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                    Spacer(minLength: 16)
-                    Text(session.state.title)
-                        .foregroundStyle(.white.opacity(0.6))
-                }
+            ForEach(Array(sessions.enumerated()), id: \.offset) { index, session in
+                SessionRow(session: session, index: index)
             }
         }
-        .font(.system(size: 13))
+        .font(Theme.line)
         .frame(minWidth: 200)
+    }
+}
+
+/// 清單的一行。展開時依序淡入（每行差 30ms），整塊同時出現比較死板。
+private struct SessionRow: View {
+    let session: SessionStatus
+    let index: Int
+    @State private var shown = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            StateIndicator(state: session.state)
+                .frame(width: Theme.dotSlot)
+            Text(session.project)
+                .foregroundStyle(.white)
+                .lineLimit(1)
+            Spacer(minLength: 16)
+            Text(session.state.title)
+                .foregroundStyle(.white.opacity(0.55))
+                // 狀態文字靠右對齊成一欄，長度不一才不會參差
+                .frame(minWidth: 58, alignment: .trailing)
+        }
+        .opacity(shown ? 1 : 0)
+        .offset(y: shown ? 0 : -3)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.2).delay(Double(index) * 0.03)) { shown = true }
+        }
     }
 }
 
@@ -117,6 +120,7 @@ private struct StateIndicator: View {
             Image(systemName: state.symbol)
                 .font(.system(size: 11))
                 .foregroundStyle(state.color)
+                .symbolEffect(.pulse, options: .repeating)
         } else {
             StatusDot(color: state.compactColor, breathing: state == .working)
                 .id(state)
@@ -143,29 +147,13 @@ struct CompactTrailingView: View {
 
     var body: some View {
         if let project = model.status?.project {
-            Text(project)
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.8))
-                .lineLimit(1)
-                .frame(maxWidth: 120)
-        }
-    }
-}
-
-struct StatusDot: View {
-    let color: Color
-    let breathing: Bool
-    @State private var dimmed = false
-
-    var body: some View {
-        Circle()
-            .fill(color)
-            .frame(width: 8, height: 8)
-            .opacity(dimmed ? 0.3 : 1)
-            .animation(
-                breathing ? .easeInOut(duration: 1).repeatForever(autoreverses: true) : nil,
-                value: dimmed
+            FadingText(
+                text: project,
+                font: Theme.compactLabel,
+                nsFont: Theme.nsFont(12),
+                maxWidth: 120
             )
-            .onAppear { if breathing { dimmed = true } }
+            .foregroundStyle(.white.opacity(0.85))
+        }
     }
 }

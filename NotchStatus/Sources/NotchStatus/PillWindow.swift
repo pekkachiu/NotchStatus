@@ -87,20 +87,41 @@ private struct PillView: View {
         RoundedRectangle(cornerRadius: showingList ? 16 : 14, style: .continuous)
     }
 
+    /// 純黑方塊看起來像貼上去的色塊；加上細描邊、頂部高光與陰影，才像實體元件
+    private var background: some View {
+        shape
+            .fill(.black)
+            .overlay(
+                shape.fill(
+                    LinearGradient(
+                        colors: [.white.opacity(0.07), .white.opacity(0)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            )
+            .overlay(shape.strokeBorder(.white.opacity(0.10), lineWidth: 1))
+            // 視窗比膠囊大且背景透明，陰影有空間可畫（NSPanel 的 hasShadow 是關的）
+            .shadow(color: .black.opacity(0.45), radius: 12, y: 4)
+    }
+
     var body: some View {
         content
             .padding(.horizontal, 14)
             .padding(.vertical, showingList ? 12 : 7)
-            .background(shape.fill(.black))
+            .background(background)
             // 內容切換的動畫中，新內容會比黑底先長大；裁在同一個形狀內，文字才不會露到膠囊外面
             .clipShape(shape)
             .onHover { hovering = $0 }
-            .animation(.snappy(duration: 0.25), value: showingList)
-            .animation(.snappy(duration: 0.25), value: model.pillExpanded)
-            .animation(.snappy(duration: 0.25), value: model.status)
+            .animation(Self.transition, value: showingList)
+            .animation(Self.transition, value: model.pillExpanded)
+            .animation(Self.transition, value: model.status)
             // 貼齊視窗頂端置中，往下長
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
+
+    /// 帶一點回彈的 spring，比等速的 snappy 有生氣
+    private static let transition: Animation = .spring(response: 0.34, dampingFraction: 0.72)
 
     @ViewBuilder
     private var content: some View {
@@ -114,12 +135,13 @@ private struct PillView: View {
             HStack(spacing: 8) {
                 StatusDot(color: status.state.compactColor, breathing: status.state == .working)
                     .id(status.state)
-                Text(status.project)
-                    .font(.system(size: 12))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .frame(maxWidth: 160)
+                FadingText(
+                    text: status.project,
+                    font: Theme.compactLabel,
+                    nsFont: Theme.nsFont(12),
+                    maxWidth: 160
+                )
+                .foregroundStyle(.white.opacity(0.9))
             }
             // 視窗比膠囊寬，不固定的話 maxWidth 會把短名稱也撐到 160pt，膠囊中間出現大片空白
             .fixedSize(horizontal: true, vertical: false)

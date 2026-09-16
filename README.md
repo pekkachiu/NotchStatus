@@ -62,7 +62,7 @@ The two sides only share a folder, so each can be tested on its own: write a JSO
 
 ## Requirements
 
-- macOS 13 or later
+- macOS 14 or later
 - A MacBook with a notch (it also works without one, using the floating pill)
 - [Claude Code](https://claude.com/claude-code)
 - Xcode Command Line Tools (`xcode-select --install`). **The full Xcode app is not required.**
