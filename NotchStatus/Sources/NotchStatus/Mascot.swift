@@ -74,8 +74,13 @@ struct MascotView: View {
         self.headroom = headroom
     }
 
-    /// idle 時右邊要留位置給飄出來的 Z
-    private var zSlot: CGFloat { state == .idle ? height * 0.7 : 0 }
+    /// idle 的 Z 與 done 的火花都畫在吉祥物右邊，要多留一欄
+    private var sideSlot: CGFloat {
+        switch state {
+        case .idle, .done: height * 0.7
+        default: 0
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -88,7 +93,7 @@ struct MascotView: View {
             }
         }
         // 跳躍發生在這個框裡面，不會溢出去；整隻因此往下坐，文字行也跟著對齊底部
-        .frame(width: height * MascotSprite.aspect + zSlot, height: height + headroom, alignment: .bottomLeading)
+        .frame(width: height * MascotSprite.aspect + sideSlot, height: height + headroom, alignment: .bottomLeading)
     }
 
     @ViewBuilder
@@ -144,19 +149,91 @@ struct MascotView: View {
         }
     }
 
-    /// 完成：出現時開心地跳一下就停住（只播一次）
+    /// 完成：蹲下蓄力 → 大跳並迸出火花 → 兩下遞減的小彈跳，只播一次。
+    /// 單純跳一下跟走路的上下晃太像，所以加上壓縮拉伸與火花拉開差別。
     private var celebrating: some View {
-        KeyframeAnimator(initialValue: CGFloat.zero) { offset in
-            MascotSprite(
-                color: color,
-                legLift: offset < -0.5 ? [1, 1, 1, 1] : [0, 0, 0, 0],
-                height: height
-            )
-            .offset(y: offset)
+        KeyframeAnimator(initialValue: Celebration()) { step in
+            ZStack(alignment: .bottomLeading) {
+                MascotSprite(
+                    color: color,
+                    // 離地時把腳收起來
+                    legLift: step.lift < -1 ? [1, 1, 1, 1] : [0, 0, 0, 0],
+                    height: height
+                )
+                .scaleEffect(y: step.squash, anchor: .bottom)
+                .offset(y: step.lift)
+
+                Sparkles(color: color, height: height)
+                    .opacity(step.sparkle)
+                    .scaleEffect(0.6 + 0.4 * step.sparkle)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            }
         } keyframes: { _ in
-            SpringKeyframe(-height / 4, duration: 0.2, spring: .snappy)
-            SpringKeyframe(0, duration: 0.42, spring: .bouncy)
+            KeyframeTrack(\.lift) {
+                LinearKeyframe(height * 0.06, duration: 0.10) // 蹲
+                SpringKeyframe(-height / 3, duration: 0.20, spring: .snappy)
+                SpringKeyframe(0, duration: 0.16)
+                SpringKeyframe(-height / 8, duration: 0.14)
+                SpringKeyframe(0, duration: 0.14)
+                SpringKeyframe(-height / 20, duration: 0.12)
+                SpringKeyframe(0, duration: 0.12)
+            }
+            KeyframeTrack(\.squash) {
+                LinearKeyframe(0.82, duration: 0.10) // 蹲下壓扁
+                LinearKeyframe(1.12, duration: 0.12) // 彈起拉長
+                LinearKeyframe(1.00, duration: 0.08)
+                LinearKeyframe(0.90, duration: 0.16) // 落地再壓一下
+                LinearKeyframe(1.00, duration: 0.14)
+                LinearKeyframe(0.94, duration: 0.14)
+                LinearKeyframe(1.00, duration: 0.26)
+            }
+            KeyframeTrack(\.sparkle) {
+                LinearKeyframe(0, duration: 0.10)
+                LinearKeyframe(1, duration: 0.14) // 跳到最高點時迸出來
+                LinearKeyframe(1, duration: 0.30)
+                LinearKeyframe(0, duration: 0.40)
+            }
         }
+    }
+}
+
+/// 慶祝動畫的三條軌道：垂直位移、垂直縮放（壓縮拉伸）、火花的不透明度
+private struct Celebration {
+    var lift: CGFloat = 0
+    var squash: CGFloat = 1
+    var sparkle: Double = 0
+}
+
+/// 完成時迸出的火花：三個大小不同的 pixel「＋」，散在吉祥物的右上方
+private struct Sparkles: View {
+    let color: Color
+    let height: CGFloat
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            SparkGlyph(color: color, cell: height / 12)
+                .offset(x: 0, y: height * 0.04)
+            SparkGlyph(color: color, cell: height / 18)
+                .offset(x: -height * 0.32, y: height * 0.30)
+            SparkGlyph(color: color, cell: height / 18)
+                .offset(x: -height * 0.10, y: height * 0.52)
+        }
+    }
+}
+
+/// 3 × 3 格的 pixel 火花（十字）
+private struct SparkGlyph: View {
+    let color: Color
+    let cell: CGFloat
+
+    var body: some View {
+        Canvas { context, size in
+            var path = Path()
+            path.addRect(CGRect(x: cell, y: 0, width: cell, height: cell * 3))
+            path.addRect(CGRect(x: 0, y: cell, width: cell * 3, height: cell))
+            context.fill(path, with: .color(color))
+        }
+        .frame(width: cell * 3, height: cell * 3)
     }
 }
 

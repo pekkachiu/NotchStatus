@@ -79,7 +79,7 @@ Claude Code hooks ──寫檔──▶ ~/.claude/notch/state/<session_id>.json 
 | `working` | compact：吉祥物走路 + 專案名 | 膠囊「吉祥物 專案名」 |
 | `idle` / 收起後的 `done` | compact：吉祥物閉眼呼吸、旁邊飄 Z + 專案名 | 膠囊內同樣的內容 |
 | `waiting` | expanded：單行「吉祥物 · 等你確認 · 專案名」，吉祥物定時跳一下，常駐直到狀態改變 | 膠囊內同樣的單行 |
-| `done` | expanded：單行「吉祥物 · 完成 · 專案名」，吉祥物彈跳一次，3 秒後收成睡著的樣子；同一筆 done 不再展開，新的 done 會 | 膠囊內同樣的單行，3 秒後縮回 |
+| `done` | expanded：單行「吉祥物 · 完成 · 專案名」，吉祥物蹲下蓄力、大跳並迸出火花、再兩下小彈跳，3 秒後收成睡著的樣子；同一筆 done 不再展開，新的 done 會 | 膠囊內同樣的單行，3 秒後縮回 |
 | 無資料 | hidden | 無膠囊 |
 | 滑鼠停在上面 | expanded：所有 session 的清單（順序同聚合規則，`Aggregator.sortedForList`），移開後復原 | 膠囊本身長成清單 |
 
