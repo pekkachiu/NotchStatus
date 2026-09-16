@@ -43,15 +43,12 @@ struct ExpandedView: View {
 /// 單行狀態「⚠ 等你確認 · 專案名」，瀏海展開與膠囊共用
 struct StatusLine: View {
     let status: SessionStatus
-    /// done 的勾勾出現時彈一下；waiting 的警告圖示持續脈動，常駐時才不會被忽略
-    @State private var appeared = false
 
     var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: status.state.symbol)
-                .foregroundStyle(status.state.color)
-                .symbolEffect(.pulse, options: .repeating, isActive: status.state == .waiting)
-                .symbolEffect(.bounce, options: .nonRepeating, value: appeared)
+        HStack(spacing: 7) {
+            // 狀態改變時重建，動作才會換成新狀態的
+            MascotView(state: status.state)
+                .id(status.state)
             Text(status.state.title)
                 .font(Theme.lineEmphasis)
                 .foregroundStyle(.white)
@@ -64,7 +61,6 @@ struct StatusLine: View {
                 .contentTransition(.opacity)
         }
         .font(Theme.line)
-        .onAppear { appeared = true }
     }
 }
 
@@ -134,8 +130,8 @@ struct CompactLeadingView: View {
 
     var body: some View {
         if let state = model.status?.state {
-            StatusDot(color: state.compactColor, breathing: state == .working)
-                // 狀態改變時重建 view，讓呼吸動畫能重新開始或停止
+            // 狀態改變時重建 view，讓動作換成新狀態的
+            MascotView(state: state)
                 .id(state)
         }
     }

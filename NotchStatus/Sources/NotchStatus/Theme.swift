@@ -35,6 +35,9 @@ enum Theme {
     /// 讓光暈不會撐大版面（瀏海 expanded 的黑色區塊是照內容大小算的）。
     static let dotSlot: CGFloat = 14
     static let dotDiameter: CGFloat = 8
+
+    /// 吉祥物高度。18pt 讓 9 格各佔 2pt（Retina 整數 4px），pixel art 的邊才不會糊。
+    static let mascotHeight: CGFloat = 18
 }
 
 extension SessionState {

@@ -133,7 +133,7 @@ private struct PillView: View {
             StatusLine(status: status)
         } else if let status = model.status {
             HStack(spacing: 8) {
-                StatusDot(color: status.state.compactColor, breathing: status.state == .working)
+                MascotView(state: status.state)
                     .id(status.state)
                 FadingText(
                     text: status.project,
