@@ -2,14 +2,15 @@ import AppKit
 import NotchStatusCore
 import SwiftUI
 
-/// 畫面用的顏色與字級。系統原色（`.blue` / `.orange` / `.green`）在純黑底上偏暗偏濁，
-/// 這裡改用手調的高亮低飽和色。
+/// 畫面用的顏色與字級。
 enum Theme {
+    /// 以吉祥物的陶土橘為主色調，各狀態只在明暗與飽和度上拉開差距：
+    /// waiting 最亮最飽和（要跳出來）、idle 最暗最濁（在睡覺）、done 淡而柔和、working 是基準色。
     enum Palette {
-        static let working = Color(red: 0.34, green: 0.66, blue: 1.00)
-        static let waiting = Color(red: 1.00, green: 0.71, blue: 0.26)
-        static let done = Color(red: 0.26, green: 0.84, blue: 0.45)
-        static let idle = Color(red: 0.58, green: 0.59, blue: 0.62)
+        static let working = Color(red: 0.88, green: 0.58, blue: 0.41)
+        static let waiting = Color(red: 1.00, green: 0.64, blue: 0.29)
+        static let done = Color(red: 0.95, green: 0.74, blue: 0.61)
+        static let idle = Color(red: 0.54, green: 0.40, blue: 0.32)
     }
 
     /// 圓體比系統 UI 字體更貼合瀏海 / 膠囊這種圓角形狀
@@ -38,6 +39,8 @@ enum Theme {
 
     /// 吉祥物高度。18pt 讓 9 格各佔 2pt（Retina 整數 4px），pixel art 的邊才不會糊。
     static let mascotHeight: CGFloat = 18
+    /// 跳起來時要留在上方的空間。expanded 的內容緊貼瀏海下緣，不留的話會跳進實體瀏海裡被遮住。
+    static let mascotHeadroom: CGFloat = mascotHeight / 4
 }
 
 extension SessionState {
@@ -50,7 +53,7 @@ extension SessionState {
         }
     }
 
-    /// compact 色點：done 收起後跟 idle 一樣是「跑完了」，用灰色
+    /// compact：done 收起後跟 idle 一樣是「跑完了」，用同一個暗色
     var compactColor: Color {
         self == .done ? Theme.Palette.idle : color
     }

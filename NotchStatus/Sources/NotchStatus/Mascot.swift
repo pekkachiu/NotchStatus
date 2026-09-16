@@ -58,15 +58,30 @@ struct MascotSprite: View {
 }
 
 /// 依狀態播不同動作的吉祥物。
-/// 顏色仍然跟著狀態走（藍 / 琥珀 / 灰 / 綠）——一眼分辨狀態是這個 App 的本體，
-/// 全部都用吉祥物原本的陶土色會失去這個作用。
+/// 顏色一律是吉祥物的陶土橘，各狀態只差在明暗與飽和度（見 `Theme.Palette`）。
 struct MascotView: View {
     let state: SessionState
+    /// 由呼叫端決定：compact 的 done 已經是「跑完收起」，要用暗色（`compactColor`）
+    var color: Color
     var height: CGFloat = Theme.mascotHeight
+    /// 上方預留的空間。expanded 的內容緊貼瀏海下緣，不留的話跳起來會進到實體瀏海裡被遮住。
+    var headroom: CGFloat = 0
 
-    private var color: Color { state.compactColor }
+    init(state: SessionState, color: Color? = nil, height: CGFloat = Theme.mascotHeight, headroom: CGFloat = 0) {
+        self.state = state
+        self.color = color ?? state.compactColor
+        self.height = height
+        self.headroom = headroom
+    }
 
     var body: some View {
+        animated
+            // 跳躍發生在這個框裡面，不會溢出去；整隻因此往下坐，文字行也跟著對齊底部
+            .frame(width: height * MascotSprite.aspect, height: height + headroom, alignment: .bottom)
+    }
+
+    @ViewBuilder
+    private var animated: some View {
         switch state {
         case .working: walking
         case .waiting: alerting

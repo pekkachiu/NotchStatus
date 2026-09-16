@@ -10,7 +10,7 @@ final class NotchModel: ObservableObject {
     @Published var sessions: [SessionStatus] = []
     /// 滑鼠停在瀏海上時，expanded 改顯示清單
     @Published var showingList = false
-    /// 膠囊（沒有瀏海時）是否顯示單行展開內容；否則顯示「色點 + 專案名」
+    /// 膠囊（沒有瀏海時）是否顯示單行展開內容；否則顯示「吉祥物 + 專案名」
     @Published var pillExpanded = false
 }
 
@@ -40,15 +40,21 @@ struct ExpandedView: View {
     }
 }
 
-/// 單行狀態「⚠ 等你確認 · 專案名」，瀏海展開與膠囊共用
+/// 單行狀態「吉祥物 · 等你確認 · 專案名」，瀏海展開與膠囊共用
 struct StatusLine: View {
     let status: SessionStatus
 
     var body: some View {
-        HStack(spacing: 7) {
+        // 底部對齊：吉祥物的框比文字高（上方留給跳躍），讓牠跟文字站在同一條地平線上
+        HStack(alignment: .bottom, spacing: 7) {
             // 狀態改變時重建，動作才會換成新狀態的
-            MascotView(state: status.state)
-                .id(status.state)
+            MascotView(
+                state: status.state,
+                // expanded 的 done 是剛跑完（淡桃色），不是收起後的暗色
+                color: status.state.color,
+                headroom: Theme.mascotHeadroom
+            )
+            .id(status.state)
             Text(status.state.title)
                 .font(Theme.lineEmphasis)
                 .foregroundStyle(.white)
@@ -107,7 +113,8 @@ private struct SessionRow: View {
     }
 }
 
-/// 清單裡的狀態指示：waiting 用警告圖示，其他用與 compact 相同的色點
+/// 清單裡的狀態指示：waiting 用警告圖示，其他用色點。
+/// 這裡不用吉祥物——四隻一起動太吵，行高也會被撐大。
 private struct StateIndicator: View {
     let state: SessionState
 
@@ -124,7 +131,7 @@ private struct StateIndicator: View {
     }
 }
 
-/// compact 左側：狀態色點，working 時呼吸
+/// compact 左側：吉祥物，依狀態播不同動作
 struct CompactLeadingView: View {
     @ObservedObject var model: NotchModel
 

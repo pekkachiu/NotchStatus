@@ -76,7 +76,7 @@ final class PillWindow {
     }
 }
 
-/// 黑色膠囊：compact 顯示「色點 + 專案名」，expanded 顯示單行狀態（waiting / done），hover 時長成清單
+/// 黑色膠囊：compact 顯示「吉祥物 + 專案名」，expanded 顯示單行狀態（waiting / done），hover 時長成清單
 private struct PillView: View {
     @ObservedObject var model: NotchModel
     @State private var hovering = false
