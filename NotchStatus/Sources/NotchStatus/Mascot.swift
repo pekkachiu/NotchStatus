@@ -74,10 +74,21 @@ struct MascotView: View {
         self.headroom = headroom
     }
 
+    /// idle 時右邊要留位置給飄出來的 Z
+    private var zSlot: CGFloat { state == .idle ? height * 0.7 : 0 }
+
     var body: some View {
-        animated
-            // 跳躍發生在這個框裡面，不會溢出去；整隻因此往下坐，文字行也跟著對齊底部
-            .frame(width: height * MascotSprite.aspect, height: height + headroom, alignment: .bottom)
+        ZStack(alignment: .bottomLeading) {
+            animated
+            if state == .idle {
+                // 瀏海 compact 的內容區只有 16pt 高（安全區上 4 下 8），Z 不能往上長，
+                // 只能在吉祥物現有的高度內、從頭部旁邊往右上飄
+                SleepingZs(color: color, height: height)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+            }
+        }
+        // 跳躍發生在這個框裡面，不會溢出去；整隻因此往下坐，文字行也跟著對齊底部
+        .frame(width: height * MascotSprite.aspect + zSlot, height: height + headroom, alignment: .bottomLeading)
     }
 
     @ViewBuilder
@@ -123,7 +134,7 @@ struct MascotView: View {
         }
     }
 
-    /// 閒置 / 跑完收起後：閉著眼睛，緩慢地呼吸
+    /// 閒置 / 跑完收起後：閉著眼睛，緩慢地呼吸（旁邊還會飄 Z，見 `SleepingZs`）
     private var sleeping: some View {
         PhaseAnimator([0, 1]) { phase in
             MascotSprite(color: color, eyeOpen: 0.1, height: height)
@@ -146,5 +157,61 @@ struct MascotView: View {
             SpringKeyframe(-height / 4, duration: 0.2, spring: .snappy)
             SpringKeyframe(0, duration: 0.42, spring: .bouncy)
         }
+    }
+}
+
+/// 睡覺時飄出來的 Z。兩個大小不同、錯開半個週期，沿同一條軌跡往右上飄並淡出，
+/// 一個週期 2.4 秒，跟呼吸同拍。
+private struct SleepingZs: View {
+    let color: Color
+    /// 吉祥物高度；Z 的大小與飄行距離都照它算
+    let height: CGFloat
+
+    /// 軌跡的四個落點：由下往上，中途最亮、到頂淡掉。
+    /// 第 3 步回到第 0 步時會整個滑回底下，但兩端的不透明度都是 0，看不到。
+    private static let riseRatios: [CGFloat] = [0.45, 0.30, 0.15, 0]
+    private static let drifts: [CGFloat] = [-3, -2, -1, 0]
+    private static let opacities: [Double] = [0, 1, 0.7, 0]
+
+    var body: some View {
+        PhaseAnimator([0, 1, 2, 3]) { phase in
+            ZStack(alignment: .topTrailing) {
+                floatingZ(cell: height / 12, step: phase, baseX: -height * 0.12)
+                floatingZ(cell: height / 18, step: (phase + 2) % 4, baseX: 0)
+            }
+        } animation: { _ in
+            .linear(duration: 0.6)
+        }
+    }
+
+    private func floatingZ(cell: CGFloat, step: Int, baseX: CGFloat) -> some View {
+        ZGlyph(color: color, cell: cell)
+            .opacity(Self.opacities[step])
+            .offset(x: baseX + Self.drifts[step], y: height * Self.riseRatios[step])
+    }
+}
+
+/// 4 × 4 格的 pixel Z。3 × 3 的話中間只剩一格，看起來像「I」而不是「Z」。
+///
+/// ```
+///   ####
+///   ..#.
+///   .#..
+///   ####
+/// ```
+private struct ZGlyph: View {
+    let color: Color
+    let cell: CGFloat
+
+    var body: some View {
+        Canvas { context, size in
+            var path = Path()
+            path.addRect(CGRect(x: 0, y: 0, width: cell * 4, height: cell)) // 上橫
+            path.addRect(CGRect(x: cell * 2, y: cell, width: cell, height: cell)) // 斜線
+            path.addRect(CGRect(x: cell, y: cell * 2, width: cell, height: cell))
+            path.addRect(CGRect(x: 0, y: cell * 3, width: cell * 4, height: cell)) // 下橫
+            context.fill(path, with: .color(color))
+        }
+        .frame(width: cell * 4, height: cell * 4)
     }
 }

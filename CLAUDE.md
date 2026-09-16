@@ -76,14 +76,16 @@ Claude Code hooks ──寫檔──▶ ~/.claude/notch/state/<session_id>.json 
 
 | 狀態 | 有瀏海 | 沒有瀏海（只剩外接螢幕） |
 |---|---|---|
-| `working` | compact：藍色呼吸點 + 專案名 | 膠囊「● 專案名」（藍點呼吸） |
-| `idle` / 收起後的 `done` | compact：灰點 + 專案名 | 膠囊「● 專案名」（灰點） |
-| `waiting` | expanded：單行「⚠ 等你確認 · 專案名」，常駐直到狀態改變 | 膠囊內同樣的單行 |
-| `done` | expanded：單行「✓ 完成 · 專案名」3 秒後收成灰點；同一筆 done 不再展開，新的 done 會 | 膠囊內同樣的單行，3 秒後縮回 |
+| `working` | compact：吉祥物走路 + 專案名 | 膠囊「吉祥物 專案名」 |
+| `idle` / 收起後的 `done` | compact：吉祥物閉眼呼吸、旁邊飄 Z + 專案名 | 膠囊內同樣的內容 |
+| `waiting` | expanded：單行「吉祥物 · 等你確認 · 專案名」，吉祥物定時跳一下，常駐直到狀態改變 | 膠囊內同樣的單行 |
+| `done` | expanded：單行「吉祥物 · 完成 · 專案名」，吉祥物彈跳一次，3 秒後收成睡著的樣子；同一筆 done 不再展開，新的 done 會 | 膠囊內同樣的單行，3 秒後縮回 |
 | 無資料 | hidden | 無膠囊 |
 | 滑鼠停在上面 | expanded：所有 session 的清單（順序同聚合規則，`Aggregator.sortedForList`），移開後復原 | 膠囊本身長成清單 |
 
 - 形態由 `Presentation.mode` 決定；畫在 DynamicNotch 還是膠囊由 `Presentation.surface` 決定。
+- 狀態指示是 `Mascot.swift` 裡用 `Canvas` 依格子畫的 pixel art 吉祥物（13 × 9 格，高 18pt 剛好一格 2pt），各狀態播不同動作。顏色一律是陶土橘，只用明暗與飽和度分辨狀態（`Theme.Palette`）。hover 清單維持色點——四隻一起動太吵，行高也會被撐大。
+- ⚠️ 瀏海 compact 的內容區只有 `notchSize.height`（實測 28pt）扣掉安全區上 4 下 8 = **16pt**。吉祥物 18pt 已略為超出但看起來正常；再加高（例如想讓 Z 往上飄）就會掉出瀏海下緣。expanded 則是內容緊貼瀏海下緣，往上跳會被實體瀏海遮住，所以 `MascotView` 在自己的框上方預留 `Theme.mascotHeadroom`，跳躍發生在框內。
 - 瀏海的 hover 來自 DynamicNotch 的 `isHovering`；`transitionConfiguration.skipIntermediateHides = true` 讓 compact ↔ expanded 直接變形，避免先收起再展開造成閃爍。
 - 從清單收起時，清單要留到收起動畫結束才換回單行內容，否則會閃出聚合狀態（例如「✓ 完成」）。
 - 狀態名稱跟隨 macOS 偏好語言（`DisplayLanguage`，App 啟動時決定一次）：繁體中文（`zh-Hant`、`zh-TW/HK/MO`）顯示「處理中 / 等你確認 / 閒置 / 完成」，其他語言一律英文「Working / Needs you / Idle / Done」；簡體中文不支援、退回英文。翻譯直接寫在 `SessionState.title(in:)`，不用 `.lproj`（CLT 手動組 .app 打包資源很麻煩）。新增文字時兩種語言都要補、並補測試。測英文畫面不用改系統語言：啟動時加 `-AppleLanguages '(en)'`。

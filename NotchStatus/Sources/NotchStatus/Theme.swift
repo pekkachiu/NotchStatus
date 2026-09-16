@@ -55,7 +55,13 @@ extension SessionState {
 
     /// compact：done 收起後跟 idle 一樣是「跑完了」，用同一個暗色
     var compactColor: Color {
-        self == .done ? Theme.Palette.idle : color
+        compactState.color
+    }
+
+    /// compact 的顯示狀態：收起後的 done 外觀等同 idle（睡著、飄 Z），
+    /// 展開中的 done 才是剛跑完的慶祝。
+    var compactState: SessionState {
+        self == .done ? .idle : self
     }
 
     var symbol: String {

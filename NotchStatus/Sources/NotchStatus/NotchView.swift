@@ -138,7 +138,7 @@ struct CompactLeadingView: View {
     var body: some View {
         if let state = model.status?.state {
             // 狀態改變時重建 view，讓動作換成新狀態的
-            MascotView(state: state)
+            MascotView(state: state.compactState)
                 .id(state)
         }
     }
