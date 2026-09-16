@@ -10,34 +10,11 @@ final class NotchModel: ObservableObject {
     @Published var sessions: [SessionStatus] = []
     /// 滑鼠停在瀏海上時，expanded 改顯示清單
     @Published var showingList = false
-    /// 膠囊（沒有瀏海時）是否顯示單行展開內容；否則顯示「色點 + 專案名」
+    /// 膠囊（沒有瀏海時）是否顯示單行展開內容；否則顯示「吉祥物 + 專案名」
     @Published var pillExpanded = false
 }
 
 extension SessionState {
-    var color: Color {
-        switch self {
-        case .working: .blue
-        case .waiting: .orange
-        case .idle: .gray
-        case .done: .green
-        }
-    }
-
-    /// compact 色點：done 收起後跟 idle 一樣是「跑完了」，用灰色
-    var compactColor: Color {
-        self == .done ? .gray : color
-    }
-
-    var symbol: String {
-        switch self {
-        case .working: "circle.dotted"
-        case .waiting: "exclamationmark.triangle.fill"
-        case .idle: "moon.fill"
-        case .done: "checkmark.circle.fill"
-        }
-    }
-
     /// 狀態名稱，跟隨系統語言（英文或繁體中文，見 `DisplayLanguage`）
     var title: String {
         title(in: appLanguage)
@@ -58,28 +35,38 @@ struct ExpandedView: View {
             SessionListView(sessions: model.sessions)
         } else if let status = model.status {
             StatusLine(status: status)
+                .animation(.smooth(duration: 0.25), value: status)
         }
     }
 }
 
-/// 單行狀態「⚠ 等你確認 · 專案名」，瀏海展開與膠囊共用
+/// 單行狀態「吉祥物 · 等你確認 · 專案名」，瀏海展開與膠囊共用
 struct StatusLine: View {
     let status: SessionStatus
 
     var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: status.state.symbol)
-                .foregroundStyle(status.state.color)
+        // 底部對齊：吉祥物的框比文字高（上方留給跳躍），讓牠跟文字站在同一條地平線上
+        HStack(alignment: .bottom, spacing: 7) {
+            // 狀態改變時重建，動作才會換成新狀態的
+            MascotView(
+                state: status.state,
+                // expanded 的 done 是剛跑完（淡桃色），不是收起後的暗色
+                color: status.state.color,
+                headroom: Theme.mascotHeadroom
+            )
+            .id(status.state)
             Text(status.state.title)
-                .fontWeight(.semibold)
+                .font(Theme.lineEmphasis)
                 .foregroundStyle(.white)
+                .contentTransition(.opacity)
             Text("·")
-                .foregroundStyle(.white.opacity(0.4))
+                .foregroundStyle(.white.opacity(0.35))
             Text(status.project)
                 .foregroundStyle(.white.opacity(0.7))
                 .lineLimit(1)
+                .contentTransition(.opacity)
         }
-        .font(.system(size: 13))
+        .font(Theme.line)
     }
 }
 
@@ -90,25 +77,44 @@ struct SessionListView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             // 同一個資料夾可能開多個 session，project 與 ts 都可能相同，用位置當 id
-            ForEach(Array(sessions.enumerated()), id: \.offset) { _, session in
-                HStack(spacing: 8) {
-                    StateIndicator(state: session.state)
-                        .frame(width: 14)
-                    Text(session.project)
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                    Spacer(minLength: 16)
-                    Text(session.state.title)
-                        .foregroundStyle(.white.opacity(0.6))
-                }
+            ForEach(Array(sessions.enumerated()), id: \.offset) { index, session in
+                SessionRow(session: session, index: index)
             }
         }
-        .font(.system(size: 13))
+        .font(Theme.line)
         .frame(minWidth: 200)
     }
 }
 
-/// 清單裡的狀態指示：waiting 用警告圖示，其他用與 compact 相同的色點
+/// 清單的一行。展開時依序淡入（每行差 30ms），整塊同時出現比較死板。
+private struct SessionRow: View {
+    let session: SessionStatus
+    let index: Int
+    @State private var shown = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            StateIndicator(state: session.state)
+                .frame(width: Theme.dotSlot)
+            Text(session.project)
+                .foregroundStyle(.white)
+                .lineLimit(1)
+            Spacer(minLength: 16)
+            Text(session.state.title)
+                .foregroundStyle(.white.opacity(0.55))
+                // 狀態文字靠右對齊成一欄，長度不一才不會參差
+                .frame(minWidth: 58, alignment: .trailing)
+        }
+        .opacity(shown ? 1 : 0)
+        .offset(y: shown ? 0 : -3)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.2).delay(Double(index) * 0.03)) { shown = true }
+        }
+    }
+}
+
+/// 清單裡的狀態指示：waiting 用警告圖示，其他用色點。
+/// 這裡不用吉祥物——四隻一起動太吵，行高也會被撐大。
 private struct StateIndicator: View {
     let state: SessionState
 
@@ -117,6 +123,7 @@ private struct StateIndicator: View {
             Image(systemName: state.symbol)
                 .font(.system(size: 11))
                 .foregroundStyle(state.color)
+                .symbolEffect(.pulse, options: .repeating)
         } else {
             StatusDot(color: state.compactColor, breathing: state == .working)
                 .id(state)
@@ -124,14 +131,14 @@ private struct StateIndicator: View {
     }
 }
 
-/// compact 左側：狀態色點，working 時呼吸
+/// compact 左側：吉祥物，依狀態播不同動作
 struct CompactLeadingView: View {
     @ObservedObject var model: NotchModel
 
     var body: some View {
         if let state = model.status?.state {
-            StatusDot(color: state.compactColor, breathing: state == .working)
-                // 狀態改變時重建 view，讓呼吸動畫能重新開始或停止
+            // 狀態改變時重建 view，讓動作換成新狀態的
+            MascotView(state: state.compactState)
                 .id(state)
         }
     }
@@ -143,29 +150,13 @@ struct CompactTrailingView: View {
 
     var body: some View {
         if let project = model.status?.project {
-            Text(project)
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.8))
-                .lineLimit(1)
-                .frame(maxWidth: 120)
-        }
-    }
-}
-
-struct StatusDot: View {
-    let color: Color
-    let breathing: Bool
-    @State private var dimmed = false
-
-    var body: some View {
-        Circle()
-            .fill(color)
-            .frame(width: 8, height: 8)
-            .opacity(dimmed ? 0.3 : 1)
-            .animation(
-                breathing ? .easeInOut(duration: 1).repeatForever(autoreverses: true) : nil,
-                value: dimmed
+            FadingText(
+                text: project,
+                font: Theme.compactLabel,
+                nsFont: Theme.nsFont(12),
+                maxWidth: 120
             )
-            .onAppear { if breathing { dimmed = true } }
+            .foregroundStyle(.white.opacity(0.85))
+        }
     }
 }

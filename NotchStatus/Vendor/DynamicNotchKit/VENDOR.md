@@ -11,7 +11,7 @@
 
 ## 與上游的差異
 
-1. 移除 `Documentation.docc`（文件與影片，不影響程式）、`Tests`，以及 `Package.swift` 裡的 `swift-docc-plugin` 依賴。
+1. 移除 `Documentation.docc`（文件與影片，不影響程式）、`Tests`，以及 `Package.swift` 裡的 `swift-docc-plugin` 依賴；`platforms` 跟著主專案設為 `.macOS(.v14)`。
 2. `Utility/EnvironmentValues+Extensions.swift`：`@Entry` 改為手寫 `EnvironmentKey`。
 3. `Views/NotchShape.swift`：移除 `#Preview`。
 4. `DynamicNotch/DynamicNotch.swift`：`init` 不再呼叫 `observeScreenParameters()`。上游會在螢幕設定改變時把視窗重建到主螢幕，外接螢幕設為主螢幕時會跑到沒有瀏海的那台；改由 `NotchController` 自行處理。
