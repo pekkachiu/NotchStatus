@@ -75,7 +75,7 @@ sleep 1
 put a working my-app;       step "處理中（my-app）" 3
 put a waiting my-app;       step "等你確認" 3.5
 put a working my-app;       step "授權後回到處理中" 2.5
-put a done my-app;          step "完成，3 秒後收成灰點" 5
+put a done my-app;          step "完成，3 秒後收起、吉祥物睡著" 5
 put b working api-server;   step "另一個 session 開始處理（api-server）" 3
 printf '▶ 現在把滑鼠移到%s上，展示所有 session 的清單\n' "$([ -n "$FORCE_NO_NOTCH" ] && echo 膠囊 || echo 瀏海)"
 sleep 6
