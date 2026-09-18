@@ -4,24 +4,26 @@ import SwiftUI
 /// 吉祥物的 pixel art。用 `Canvas` 畫格子而不是貼圖：任何尺寸都銳利、不用打包圖檔，
 /// 而且腳與眼睛可以各自動起來。
 ///
+/// 造型是一隻大耳朵、小尾巴的老鼠：單色、只挖兩個眼睛，刻意維持簡單的積木感。
+///
 /// 13 × 9 格。高度取 `Theme.mascotHeight`（18pt）時每格剛好 2pt，在 Retina 上是整數 4px，邊緣不會糊。
 ///
 /// ```
-///   . . ####### . .
-///   . . ####### . .
-///   . . #O###O# . .   O = 眼睛（挖空）
-///   ####O###O####     兩側是短手
-///   #############
-///   . . ####### . .
-///   . . ####### . .
-///   . . # # # # . .   四隻腳
-///   . . # # # # . .
+///   ###.......###     往兩側張開的大耳朵
+///   ####.....####
+///   .###########.
+///   ..##O###O##..     O = 眼睛（挖空）
+///   ..##O###O##..
+///   ..#########..
+///   ..#########.#     右下角翹起的尾巴
+///   ..##########.
+///   ..##.....##..     兩隻腳
 /// ```
 struct MascotSprite: View {
     let color: Color
-    /// 每隻腳縮短的格數（由左到右）。腳是從下緣往上縮，不會疊到身體——
-    /// evenOdd 填色下，疊到身體的部分會變成洞。
-    var legLift: [CGFloat] = [0, 0, 0, 0]
+    /// 左、右腳縮短的比例（1 = 整隻收起）。腳是從下緣往上縮，不會疊到身體——
+    /// evenOdd 填色下，任何重疊的格子都會變成洞，所以下面每個矩形都互不重疊。
+    var legLift: [CGFloat] = [0, 0]
     /// 眼睛張開程度：1 = 全開，接近 0 = 閉上
     var eyeOpen: CGFloat = 1
     var height: CGFloat = Theme.mascotHeight
@@ -38,16 +40,23 @@ struct MascotSprite: View {
             }
 
             var path = Path()
-            path.addRect(box(2, 0, 9, 7)) // 身體
-            path.addRect(box(0, 3, 2, 2)) // 左手
-            path.addRect(box(11, 3, 2, 2)) // 右手
-            for (index, x) in [CGFloat(2), 4, 8, 10].enumerated() {
-                let lift = min(legLift[index], 2)
-                path.addRect(box(x, 7, 1, 2 - lift))
+            path.addRect(box(0, 0, 3, 1)) // 左耳
+            path.addRect(box(0, 1, 4, 1))
+            path.addRect(box(10, 0, 3, 1)) // 右耳
+            path.addRect(box(9, 1, 4, 1))
+            path.addRect(box(1, 2, 11, 1)) // 頭頂
+            path.addRect(box(2, 3, 9, 5)) // 身體
+            path.addRect(box(12, 6, 1, 1)) // 尾巴
+            path.addRect(box(11, 7, 1, 1))
+            for (index, x) in [CGFloat(2), 9].enumerated() {
+                let lift = min(max(legLift[index], 0), 1)
+                if lift < 1 {
+                    path.addRect(box(x, 8, 2, 1 - lift))
+                }
             }
             // 眼睛用 evenOdd 挖成真正的洞，底下是什麼顏色都對
             let eyeHeight = max(0.3, 2 * eyeOpen)
-            let eyeY = 2 + (2 - eyeHeight) / 2
+            let eyeY = 3 + (2 - eyeHeight) / 2
             path.addRect(box(4, eyeY, 1, eyeHeight))
             path.addRect(box(8, eyeY, 1, eyeHeight))
 
@@ -58,7 +67,7 @@ struct MascotSprite: View {
 }
 
 /// 依狀態播不同動作的吉祥物。
-/// 顏色一律是吉祥物的陶土橘，各狀態只差在明暗與飽和度（見 `Theme.Palette`）。
+/// 顏色一律是吉祥物的焦糖色系，各狀態只差在明暗與飽和度（見 `Theme.Palette`）。
 struct MascotView: View {
     let state: SessionState
     /// 由呼叫端決定：compact 的 done 已經是「跑完收起」，要用暗色（`compactColor`）
@@ -106,13 +115,13 @@ struct MascotView: View {
         }
     }
 
-    /// 處理中：兩組腳交替縮放，身體跟著上下晃，像在走路。
+    /// 處理中：左右腳交替縮起，身體跟著上下晃，像在走路。
     /// pixel art 本來就是一格一格換，腳直接跳不補間才對味。
     private var walking: some View {
         PhaseAnimator([0, 1]) { phase in
             MascotSprite(
                 color: color,
-                legLift: phase == 0 ? [0.7, 0, 0, 0.7] : [0, 0.7, 0.7, 0],
+                legLift: phase == 0 ? [0.7, 0] : [0, 0.7],
                 height: height
             )
             .offset(y: phase == 0 ? -0.5 : 0.5)
@@ -126,7 +135,7 @@ struct MascotView: View {
         PhaseAnimator([0, 1, 2]) { phase in
             MascotSprite(
                 color: color,
-                legLift: phase == 1 ? [1, 1, 1, 1] : [0, 0, 0, 0],
+                legLift: phase == 1 ? [1, 1] : [0, 0],
                 height: height
             )
             .offset(y: phase == 1 ? -height / 6 : 0)
@@ -157,7 +166,7 @@ struct MascotView: View {
                 MascotSprite(
                     color: color,
                     // 離地時把腳收起來
-                    legLift: step.lift < -1 ? [1, 1, 1, 1] : [0, 0, 0, 0],
+                    legLift: step.lift < -1 ? [1, 1] : [0, 0],
                     height: height
                 )
                 .scaleEffect(y: step.squash, anchor: .bottom)
