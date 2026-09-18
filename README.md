@@ -22,10 +22,10 @@
 
 | State | In the notch | When |
 |---|---|---|
-| Working | Breathing blue dot on the left of the notch, project name on the right | Claude is thinking or running tools |
-| Waiting | Notch expands to "⚠ Needs you · project" and stays open | Claude needs your permission or an answer |
-| Done | "✓ Done · project" for 3 seconds, then collapses to a gray dot | The turn has finished |
-| Idle | Gray dot and project name | Finished and waiting for your next prompt |
+| Working | A little pixel-art mascot walks on the left of the notch, project name on the right | Claude is thinking or running tools |
+| Waiting | Notch expands to "Needs you · project" and stays open while the mascot hops to get your attention | Claude needs your permission or an answer |
+| Done | "Done · project" for 3 seconds as the mascot crouches, leaps with a burst of sparks, and bounces twice, then it collapses and falls asleep | The turn has finished |
+| Idle | The mascot sleeps with its eyes closed and Zs drifting by, next to the project name | Finished and waiting for your next prompt |
 
 Labels follow your macOS language: English, or Traditional Chinese when that's your preferred language. (The demo GIFs were recorded with the Traditional Chinese labels.)
 
@@ -182,7 +182,7 @@ See [CLAUDE.md](CLAUDE.md) for design decisions and known issues.
 ## Known limitations
 
 - The notch shows one session at a time. While another session is still working, a session that just finished won't show its "done" banner (the hover list shows everything).
-- Claude Code's `idle_prompt` notification doesn't always fire, so the gray "finished" dot comes from the collapsed "done" state rather than from that notification.
+- Claude Code's `idle_prompt` notification doesn't always fire, so the sleeping "finished" mascot comes from the collapsed "done" state rather than from that notification.
 - The `Notification` hook sometimes fires 1–2 seconds after `Stop`, so the status can briefly lag.
 - There's no menu to quit the app; use `pkill`.
 
