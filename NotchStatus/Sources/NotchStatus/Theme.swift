@@ -4,13 +4,13 @@ import SwiftUI
 
 /// 畫面用的顏色與字級。
 enum Theme {
-    /// 以吉祥物的陶土橘為主色調，各狀態只在明暗與飽和度上拉開差距：
-    /// waiting 最亮最飽和（要跳出來）、idle 最暗最濁（在睡覺）、done 淡而柔和、working 是基準色。
+    /// 以吉祥物的焦糖色為主色調，各狀態只在明暗與飽和度上拉開差距：
+    /// waiting 是最飽和的蜂蜜黃（要跳出來）、idle 是深咖啡（在睡覺）、done 是淺奶油、working 是基準色。
     enum Palette {
-        static let working = Color(red: 0.88, green: 0.58, blue: 0.41)
-        static let waiting = Color(red: 1.00, green: 0.64, blue: 0.29)
-        static let done = Color(red: 0.95, green: 0.74, blue: 0.61)
-        static let idle = Color(red: 0.54, green: 0.40, blue: 0.32)
+        static let working = Color(red: 0.90, green: 0.76, blue: 0.58)
+        static let waiting = Color(red: 1.00, green: 0.80, blue: 0.40)
+        static let done = Color(red: 0.97, green: 0.90, blue: 0.79)
+        static let idle = Color(red: 0.50, green: 0.40, blue: 0.30)
     }
 
     /// 圓體比系統 UI 字體更貼合瀏海 / 膠囊這種圓角形狀

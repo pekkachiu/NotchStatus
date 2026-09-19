@@ -84,7 +84,7 @@ Claude Code hooks ──寫檔──▶ ~/.claude/notch/state/<session_id>.json 
 | 滑鼠停在上面 | expanded：所有 session 的清單（順序同聚合規則，`Aggregator.sortedForList`），移開後復原 | 膠囊本身長成清單 |
 
 - 形態由 `Presentation.mode` 決定；畫在 DynamicNotch 還是膠囊由 `Presentation.surface` 決定。
-- 狀態指示是 `Mascot.swift` 裡用 `Canvas` 依格子畫的 pixel art 吉祥物（13 × 9 格，高 18pt 剛好一格 2pt），各狀態播不同動作。顏色一律是陶土橘，只用明暗與飽和度分辨狀態（`Theme.Palette`）。hover 清單維持色點——四隻一起動太吵，行高也會被撐大。
+- 狀態指示是 `Mascot.swift` 裡用 `Canvas` 依格子畫的 pixel art 吉祥物：大耳朵、小尾巴的老鼠（13 × 9 格，高 18pt 剛好一格 2pt），各狀態播不同動作。顏色一律是焦糖色系，只用明暗與飽和度分辨狀態（`Theme.Palette`）。原本是類似 Claude Code 吉祥物（Clawd）的造型與陶土橘，為了避免被誤認為 Anthropic 官方角色而改掉——新造型也不要做得像 Clawd 或其他知名角色（例如皮卡丘）。hover 清單維持色點——四隻一起動太吵，行高也會被撐大。
 - ⚠️ 瀏海 compact 的內容區只有 `notchSize.height`（實測 28pt）扣掉安全區上 4 下 8 = **16pt**。吉祥物 18pt 已略為超出但看起來正常；再加高（例如想讓 Z 往上飄）就會掉出瀏海下緣。expanded 則是內容緊貼瀏海下緣，往上跳會被實體瀏海遮住，所以 `MascotView` 在自己的框上方預留 `Theme.mascotHeadroom`，跳躍發生在框內。
 - 瀏海的 hover 來自 DynamicNotch 的 `isHovering`；`transitionConfiguration.skipIntermediateHides = true` 讓 compact ↔ expanded 直接變形，避免先收起再展開造成閃爍。
 - 從清單收起時，清單要留到收起動畫結束才換回單行內容，否則會閃出聚合狀態（例如「✓ 完成」）。
