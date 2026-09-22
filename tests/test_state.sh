@@ -45,5 +45,10 @@ fake_pid=$("$FAKE_CLAUDE" -c 'jq -nc "{session_id:\"p1\", cwd:\"/tmp\"}" | "$1" 
 check "pid 是祖先 claude 行程" "$(jq -r .pid "$STATE_DIR/p1.json")" "$fake_pid"
 check "pid 是數字" "$(jq -r '.pid | type' "$STATE_DIR/p1.json")" "number"
 
+# 背景 session：daemon（名為 claude）底下的 session 行程名稱帶參數（「claude bg-spare」）。
+# 要記 session 行程，不能記一直活著的 daemon，否則 session 中斷後狀態檔永遠清不掉
+bg_pid=$("$FAKE_CLAUDE" -c '(exec -a "claude bg-spare" /bin/bash -c '"'"'jq -nc "{session_id:\"p2\", cwd:\"/tmp\"}" | "$1" working; echo $$'"'"' _ "$1"); true' _ "$SCRIPT")
+check "背景 session：pid 是最近的 claude 行程而非 daemon" "$(jq -r .pid "$STATE_DIR/p2.json")" "$bg_pid"
+
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]

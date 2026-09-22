@@ -8,11 +8,13 @@ mkdir -p "$state_dir"
 
 # 往上找 Claude Code 的行程。直接關掉終端機時不會觸發 SessionEnd，
 # App 用這個 pid 判斷 session 是否還活著、清掉殘留的狀態檔。找不到就留空。
+# 背景 session 的行程名稱帶參數（「claude bg-spare」），只比第一段；
+# 否則會跳過它、記到上層一直活著的 daemon，session 中斷後狀態檔永遠清不掉。
 claude_pid() {
   local p=$PPID comm
   while [ "${p:-0}" -gt 1 ]; do
     comm=$(ps -o comm= -p "$p") || return
-    if [ "$(basename "$comm")" = "claude" ]; then
+    if [ "$(basename "${comm%% *}")" = "claude" ]; then
       echo "$p"
       return
     fi

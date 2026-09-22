@@ -133,7 +133,7 @@ Claude Code hooks ──寫檔──▶ ~/.claude/notch/state/<session_id>.json 
 - 🔴 **所有 hook 腳本結尾必須 `exit 0`**。`Stop` hook 回傳 exit 2 會阻止 Claude 停下、造成無限循環。這行不能刪或「優化」掉。
 - 🟡 Hook 在非互動 shell 執行但仍會 source `~/.zshrc`，其中的 `echo` 會污染 stdout。目前腳本只寫檔不靠 stdout，若改成輸出 JSON 會變成 bug。
 - 🟡 `Notification` hook 可能比 `Stop` 晚 1–2 秒觸發（issue #23383，使用者回報），不是 bug，不用 debug。若使用者在延遲期間就按了授權，延遲寫入的 `waiting` 可能短暫蓋掉 `PostToolUse` 寫的 `working`，直到下一個工具執行完或 `Stop`。暫不處理。
-- 🟡 直接關掉終端機不會觸發 `SessionEnd`。`state.sh` 會往上找名為 `claude` 的祖先行程寫入 `pid`，App 讀檔時刪掉 pid 已結束的狀態檔，並每 10 秒重讀一次（關終端機不會產生檔案事件）。沒有 `pid` 的舊檔案不會被刪。
+- 🟡 直接關掉終端機不會觸發 `SessionEnd`。`state.sh` 會往上找名為 `claude` 的祖先行程寫入 `pid`，App 讀檔時刪掉 pid 已結束的狀態檔，並每 10 秒重讀一次（關終端機不會產生檔案事件）。沒有 `pid` 的舊檔案不會被刪。背景 session（由 `claude daemon` 開出）的行程名稱是「claude bg-spare」，所以比對時只看名稱第一段，否則會記到一直活著的 daemon、狀態檔永遠清不掉。
 - 🟡 DynamicNotch 預設顯示在 `NSScreen.screens[0]`（主螢幕）；外接螢幕設為主螢幕時那台沒有瀏海，所以 `NotchController` 會明確指定有瀏海的螢幕。vendor 版已拿掉 DynamicNotchKit 在螢幕變化時自行重建到主螢幕的邏輯，改由 `NotchController` 監聽 `didChangeScreenParametersNotification` 後收起再重新顯示。
 - 🟡 DynamicNotchKit 在沒有瀏海的螢幕上是 floating 樣式：**不支援 compact**（會直接隱藏），而且是系統 popover 材質（跟黑色不一致、白字在淺色模式看不清）。所以沒有瀏海時完全不用 DynamicNotch，全部畫在 `PillWindow`；膠囊的 hover 清單也在同一個視窗內完成，避免兩個視窗交接 hover 造成閃爍。
 - 🟡 compact 會往右偏（右側專案名比左側色點寬，DynamicNotchKit 位移整條以保持瀏海位置），展開時回到置中，看起來像「往左偏」——這是正常的，使用者已決定不改。用截圖判斷位置時，要以選單列文字為基準，不能用圖片中心（截圖裁切範圍不一定一致）。
